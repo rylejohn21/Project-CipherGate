@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CipherGate - Admin Dashboard</title>
+    <link rel="stylesheet" href="style.css?v=20260519-3">
+</head>
+<body>
+    <!--  Day/Night mode toggle -->
+    <div class="theme-toggle">
+        <button id="themeToggle" class="theme-btn" title="Toggle Dark/Light Mode">
+            🌙
+        </button>
+    </div>
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <img src="../logo1.png" alt="CipherGate Logo" class="logo-img">
+                <span class="logo-text">CipherGate - Admin</span>
+            </div>
+            <ul class="nav-menu">
+                <li><span class="user-info" id="userDisplay">Admin</span></li>
+                <li><a href="#" onclick="logout()" class="nav-link btn-logout">Logout</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="dashboard-container">
+        <sidebar class="sidebar">
+            <div class="sidebar-menu">
+                <button class="menu-item active" onclick="showSection('dashboard', this)">
+                    📊 Dashboard Overview
+                </button>
+                <button class="menu-item" onclick="showSection('users', this)">
+                    👥 User Management
+                </button>
+                <button class="menu-item" onclick="showSection('logs', this)">
+                    📋 Activity Logs
+                </button>
+            </div>
+        </sidebar>
+
+        <main class="dashboard-content admin-content">
+            <!-- Dashboard Overview -->
+            <section id="dashboard" class="dashboard-section">
+                <div class="section-header">
+                    <h2>Admin Dashboard</h2>
+                    <p> Full system overview and management capabilities</p>
+                </div>
+
+                <div class="dashboard-stats">
+                    <div class="stat-card">
+                        <div class="stat-icon">👥</div>
+                        <div class="stat-info">
+                            <h4>Total Users</h4>
+                            <p class="stat-value" id="totalUsers">0</p>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon">🔒</div>
+                        <div class="stat-info">
+                            <h4>Locked Accounts</h4>
+                            <p class="stat-value" id="lockedAccounts">0</p>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon">📊</div>
+                        <div class="stat-info">
+                            <h4>Recent Activities</h4>
+                            <p class="stat-value" id="recentActivities">0</p>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon">✅</div>
+                        <div class="stat-info">
+                            <h4>System Status</h4>
+                            <p class="stat-value status-online">Online</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="info-box info-primary">
+                    <h4>🔐 Admin Privileges</h4>
+                    <p> Role-Based Access Control (RBAC)</p>
+                    <ul>
+                        <li>✅ View all users and their details</li>
+                        <li>✅ View complete activity audit trail</li>
+                        <li>✅ Unlock locked accounts (Feature 3)</li>
+                        <li>✅ Monitor login failures and security events</li>
+                        <li>✅ Track IP addresses and user agents</li>
+                        <li>✅ Generate security reports</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- User Management Section -->
+            <section id="users" class="dashboard-section">
+                <div class="section-header">
+                    <h2>User Management</h2>
+                    <p> Manage all system users and their access</p>
+                </div>
+
+                <div class="section-controls">
+                    <div class="search-box">
+                        <input 
+                            type="text" 
+                            id="userSearch" 
+                            placeholder="Search users by username..."
+                            onkeyup="filterUsers()"
+                        >
+                    </div>
+                    <button onclick="loadUsers()" class="btn btn-secondary">🔄 Refresh</button>
+                </div>
+
+                <div id="usersTableContainer" class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Username</th>
+                                <th>Role</th>
+                                <th>Failed Attempts</th>
+                                <th>Total Failed Logins</th>
+                                <th>Locked Until</th>
+                                <th>Created</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersTableBody">
+                            <tr><td colspan="7">Loading users...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="table-legend">
+                    <p><strong>Legend:</strong></p>
+                    <ul>
+                        <li>🔒 Locked - Account locked after 3 failed attempts</li>
+                        <li>🔓 Active - User can login normally</li>
+                        <li>🔑 RBAC -  Admin role has full access, User role has limited access</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Activity Logs Section -->
+            <section id="logs" class="dashboard-section">
+                <div class="section-header">
+                    <h2>Activity Logs</h2>
+                    <p>Feature 4: Complete audit trail of all system activities</p>
+                </div>
+
+                <div class="section-controls">
+                    <div class="search-box">
+                        <input 
+                            type="text" 
+                            id="logSearch" 
+                            placeholder="Search logs by username or action..."
+                            onkeyup="filterLogs()"
+                        >
+                    </div>
+                    <select id="actionFilter" onchange="filterLogs()" class="filter-select">
+                        <option value="">All Actions</option>
+                        <option value="LOGIN_SUCCESS">✅ Login Success</option>
+                        <option value="LOGIN_FAILURE">❌ Login Failure</option>
+                        <option value="LOGIN_ATTEMPT_LOCKED">🚫 Locked Attempt</option>
+                        <option value="PASSWORD_CHANGED">🔐 Password Changed</option>
+                        <option value="LOGOUT">🚪 Logout</option>
+                        <option value="VIEW_LOGS">📋 View Logs</option>
+                    </select>
+                    <button onclick="loadLogs()" class="btn btn-secondary">🔄 Refresh</button>
+                </div>
+
+                <div id="logsTableContainer" class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Timestamp</th>
+                                <th>Username</th>
+                                <th>Action</th>
+                                <th>Details</th>
+                                <th>IP Address</th>
+                            </tr>
+                        </thead>
+                        <tbody id="logsTableBody">
+                            <tr><td colspan="5">Loading logs...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="info-box info-secondary">
+                    <h4>📋 Log Information</h4>
+                    <p>All activities are automatically logged with:</p>
+                    <ul>
+                        <li>✅ Timestamp of action</li>
+                        <li>✅ Username performing action</li>
+                        <li>✅ Action type (login, logout, password change, etc.)</li>
+                        <li>✅ IP address and user agent</li>
+                        <li>✅ Additional details for security events</li>
+                    </ul>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <footer class="footer">
+        <p>&copy; 2024 CipherGate - Advanced Code Breaker Security System. Admin Portal.</p>
+    </footer>
+
+    <script src="js/config.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/theme.js"></script>
+    <script src="js/admin-dashboard.js"></script>
+</body>
+</html>

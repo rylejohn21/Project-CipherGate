@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CipherGate - User Dashboard</title>
+    <link rel="stylesheet" href="style.css?v=20260519-3">
+</head>
+<body>
+    <!-- Feature 14: Day/Night mode toggle -->
+    <div class="theme-toggle">
+        <button id="themeToggle" class="theme-btn" title="Toggle Dark/Light Mode">
+            🌙
+        </button>
+    </div>
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <img src="../logo1.png" alt="CipherGate Logo" class="logo-img">
+                <span class="logo-text">CipherGate</span>
+            </div>
+            <ul class="nav-menu">
+                <li><span class="user-info" id="userDisplay">User</span></li>
+                <li><a href="#" onclick="logout()" class="nav-link btn-logout">Logout</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="dashboard-container">
+        <sidebar class="sidebar">
+            <div class="sidebar-menu">
+                <button class="menu-item active" onclick="showSection('profile', this)">
+                    👤 My Profile
+                </button>
+                <button class="menu-item" onclick="showSection('security', this)">
+                    🔐 Security Settings
+                </button>
+            </div>
+        </sidebar>
+
+        <main class="dashboard-content">
+            <!-- Profile Section -->
+            <section id="profile" class="dashboard-section">
+                <div class="section-header">
+                    <h2>My Profile</h2>
+                    <p>Regular users can only view their own profile</p>
+                </div>
+
+                <div class="profile-card">
+                    <div class="profile-header">
+                        <div class="avatar">👤</div>
+                        <div class="profile-info">
+                            <h3 id="profileUsername">Loading...</h3>
+                            <p id="profileRole">User Role</p>
+                        </div>
+                    </div>
+
+                    <div class="profile-details">
+                        <div class="detail-row">
+                            <span class="detail-label">Username</span>
+                            <span class="detail-value" id="displayUsername">-</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Role</span>
+                            <span class="detail-value" id="displayRole">-</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Account Type</span>
+                            <span class="detail-value">Standard User</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Permissions</span>
+                            <span class="detail-value">View own profile only</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="info-box info-primary">
+                    <h4>📋 Access Information</h4>
+                    <p>As a regular user, you have access to:</p>
+                    <ul>
+                        <li>✅ View your own profile information</li>
+                        <li>✅ Change your password</li>
+                        <li>✅ Update security question</li>
+                        <li>❌ View activity logs (Admin only)</li>
+                        <li>❌ Manage other users (Admin only)</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Security Settings Section -->
+            <section id="security" class="dashboard-section">
+                <div class="section-header">
+                    <h2>Security Settings</h2>
+                    <p>Manage your account security</p>
+                </div>
+
+                <!-- Change Password -->
+                <div class="settings-card">
+                    <h3>Change Password</h3>
+                    <p class="card-description">Update your password with bcryptjs hashing</p>
+                    
+                    <form id="changePasswordForm" class="form">
+                        <div class="form-group">
+                            <label for="currentPassword">Current Password</label>
+                            <div class="password-input-group">
+                                <input 
+                                    type="password" 
+                                    id="currentPassword" 
+                                    name="currentPassword"
+                                    placeholder="Enter current password"
+                                    required
+                                >
+                                <button type="button" class="password-toggle" onclick="togglePasswordVisibility('currentPassword')">
+                                    👁️
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="newPassword">New Password</label>
+                            <div class="password-input-group">
+                                <input 
+                                    type="password" 
+                                    id="newPassword" 
+                                    name="newPassword"
+                                    placeholder="At least 8 chars (1 uppercase, 1 number)"
+                                    required
+                                >
+                                <button type="button" class="password-toggle" onclick="togglePasswordVisibility('newPassword')">
+                                    👁️
+                                </button>
+                            </div>
+                        </div>
+
+                        <div id="passwordError" class="error-message" style="display: none;"></div>
+                        <div id="passwordSuccess" class="success-message" style="display: none;"></div>
+
+                        <button type="submit" class="btn btn-primary">Update Password</button>
+                    </form>
+                </div>
+
+                <!-- Password Requirements -->
+                <div class="info-box info-warning">
+                    <h4>🔒 Password Requirements</h4>
+                    <ul>
+                        <li>Minimum 8 characters</li>
+                        <li>At least 1 uppercase letter (A-Z)</li>
+                        <li>At least 1 number (0-9)</li>
+                        <li>Special characters allowed (@$!%*?&)</li>
+                    </ul>
+                </div>
+
+                <!-- Session Info -->
+                <div class="settings-card">
+                    <h3>Session Information</h3>
+                    <p class="card-description">Feature 6: Your current session details</p>
+                    
+                    <div class="session-info">
+                        <div class="info-row">
+                            <span class="info-label">Session Status</span>
+                            <span class="info-value status-active">✅ Active</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Session Timeout</span>
+                            <span class="info-value">24 hours</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Session Cookie</span>
+                            <span class="info-value">HTTP-only Secure</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">XSRF Protection</span>
+                            <span class="info-value">✅ Enabled</span>
+                        </div>
+                    </div>
+
+                    <button onclick="logout()" class="btn btn-danger">Logout & End Session</button>
+                </div>
+
+                <!-- Security Tips -->
+                <div class="info-box info-secondary">
+                    <h4>🛡️ Security Best Practices</h4>
+                    <ul>
+                        <li>Never share your password with anyone</li>
+                        <li>Change your password regularly</li>
+                        <li>Use unique passwords for different accounts</li>
+                        <li>Always logout from shared devices</li>
+                        <li>Be aware of phishing attempts</li>
+                        <li> If you exceed 3 login attempts, account locks for 30 seconds</li>
+                    </ul>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <footer class="footer">
+        <p>&copy; 2024 CipherGate - Advanced Code Breaker Security System. Secured by bcryptjs encryption.</p>
+    </footer>
+
+    <script src="js/config.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/theme.js"></script>
+    <script src="js/dashboard.js"></script>
+</body>
+</html>

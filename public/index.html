@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CipherGate - Advanced Code Breaker Security System</title>
+    <link rel="stylesheet" href="style.css?v=20260519-3">
+</head>
+<body>
+    <!--  Day/Night mode toggle -->
+    <div class="theme-toggle">
+        <button id="themeToggle" class="theme-btn" title="Toggle Dark/Light Mode">
+            🌙
+        </button>
+    </div>
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <img src="../logo1.png" alt="CipherGate Logo" class="logo-img">
+                <span class="logo-text">CipherGate</span>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="#home" class="nav-link">Home</a></li>
+                <li><a href="#features" class="nav-link">Features</a></li>
+                <li><a href="#security" class="nav-link">Security</a></li>
+                <li><a href="login.html" class="nav-link btn-login">Login</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main>
+        <!-- Hero Section -->
+        <section id="home" class="hero">
+            <div class="hero-content">
+                <div class="hero-eyebrow">Blue Shield Security Platform</div>
+                <h1 class="hero-title">
+                    Protect every login with
+                    <span class="gradient-text">smarter access defense</span>
+                </h1>
+                <p class="hero-subtitle">Advanced Code Breaker Security System</p>
+                <p class="hero-description">
+                    CipherGate combines secure authentication, role-based access, activity visibility, and bot protection in one modern security experience built for teams that need more than a plain login screen.
+                </p>
+                <div class="hero-actions">
+                    <a href="login.html" class="btn btn-primary">Get Started</a>
+                    <a href="#features" class="btn btn-secondary">Explore Features</a>
+                </div>
+                <div class="hero-highlights">
+                    <div class="highlight-card">
+                        <span class="highlight-value">24/7</span>
+                        <span class="highlight-label">session monitoring</span>
+                    </div>
+                    <div class="highlight-card">
+                        <span class="highlight-value">3-step</span>
+                        <span class="highlight-label">attack resistance flow</span>
+                    </div>
+                    <div class="highlight-card">
+                        <span class="highlight-value">RBAC</span>
+                        <span class="highlight-label">admin + user control</span>
+                    </div>
+                </div>
+            </div>
+            <div class="hero-visual">
+                <div class="hero-panel">
+                    <div class="hero-panel-header">
+                        <span>Security Status</span>
+                        <span class="panel-status">ACTIVE</span>
+                    </div>
+                    <div class="security-icon">🛡️</div>
+                    <div class="security-badges">
+                        <span class="security-badge">Bcrypt</span>
+                        <span class="security-badge">CAPTCHA</span>
+                        <span class="security-badge">Audit Logs</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="home-overview">
+            <h2>Why CipherGate Feels Stronger</h2>
+            <div class="overview-grid">
+                <article class="overview-card">
+                    <h3>Cleaner first impression</h3>
+                    <p>
+                        A richer blue gradient, glass-style cards, and layered lighting effects give the homepage a more polished security-dashboard look.
+                    </p>
+                    <ul>
+                        <li>Modern blue gradient background</li>
+                        <li>Soft glowing accents</li>
+                        <li>More depth and contrast</li>
+                    </ul>
+                </article>
+                <article class="overview-card">
+                    <h3>Stronger product messaging</h3>
+                    <p>
+                        The hero now explains the value of the system immediately instead of only showing a short title and one button.
+                    </p>
+                    <ul>
+                        <li>Clearer headline hierarchy</li>
+                        <li>Feature-focused callouts</li>
+                        <li>Extra call-to-action button</li>
+                    </ul>
+                </article>
+                <article class="overview-card">
+                    <h3>Better visual engagement</h3>
+                    <p>
+                        The new security panel and highlights make the page feel more interactive and less empty while still matching your existing theme.
+                    </p>
+                    <ul>
+                        <li>Status panel on the hero</li>
+                        <li>Quick security badges</li>
+                        <li>Summary stats for impact</li>
+                    </ul>
+                </article>
+            </div>
+        </section>
+
+        <!-- Features Section -->
+        <section id="features" class="features">
+            <h2>Core Security Features</h2>
+            <div class="features-grid">
+                <!--  Password Hashing -->
+                <div class="feature-card">
+                    <div class="feature-icon">🔑</div>
+                    <h3>Bcrypt Password Hashing</h3>
+                    <p> Military-grade bcrypts hashing with 10 salt rounds. Passwords are never stored in plain text.</p>
+                </div>
+
+                <!-- Feature 3: Lockout Mechanism -->
+                <div class="feature-card">
+                    <div class="feature-icon">🚫</div>
+                    <h3>Attempt Lockout Protection</h3>
+                    <p> Account automatically locks after 3 failed login attempts with 30-second cooldown period to prevent brute force attacks.</p>
+                </div>
+
+                <!-- Feature 4: RBAC -->
+                <div class="feature-card">
+                    <div class="feature-icon">👥</div>
+                    <h3>Role-Based Access Control</h3>
+                    <p> Admins can view all users and activity logs. Regular users see only their own profile. Granular permission management.</p>
+                </div>
+
+                <!-- Feature 6: Session Management -->
+                <div class="feature-card">
+                    <div class="feature-icon">🔐</div>
+                    <h3>Secure Session Management</h3>
+                    <p> HTTP-only cookies, secure session storage, automatic timeouts (24 hours), and secure logout with session destruction.</p>
+                </div>
+
+                <!-- Feature 10: CAPTCHA -->
+                <div class="feature-card">
+                    <div class="feature-icon">🧮</div>
+                    <h3>Math CAPTCHA Verification</h3>
+                    <p> AI-resistant simple math CAPTCHA to verify human identity during login without complexity barriers.</p>
+                </div>
+
+                <!-- Feature 14: Theme Toggle -->
+                <div class="feature-card">
+                    <div class="feature-icon">🌓</div>
+                    <h3>Day/Night Mode</h3>
+                    <p> Modern cybersecurity-themed dark/light mode toggle for optimal viewing in any lighting condition.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Security Section -->
+        <section id="security" class="security-info">
+            <h2>Security Implementation Details</h2>
+            <div class="security-details">
+                <div class="detail-item">
+                    <h4>🛡️ Password Security</h4>
+                    <ul>
+                        <li>Bcrypts hashing with 10 salt rounds</li>
+                        <li>No plaintext passwords stored in database</li>
+                        <li>Secure password comparison using timing-safe functions</li>
+                        <li>MySQL/Supabase integration for secure storage</li>
+                    </ul>
+                </div>
+
+                <div class="detail-item">
+                    <h4>🚨 Brute Force Protection</h4>
+                    <ul>
+                        <li>Failed attempt tracking per user</li>
+                        <li>Automatic 30-second lockout after 3 attempts</li>
+                        <li>Exponential backoff for repeated attacks</li>
+                        <li>Admin unlock capability</li>
+                    </ul>
+                </div>
+
+                <div class="detail-item">
+                    <h4>👤 Access Control</h4>
+                    <ul>
+                        <li>Role-based access control (RBAC)</li>
+                        <li>Admin and User roles with different permissions</li>
+                        <li>Complete audit trail of all activities</li>
+                        <li>IP address and user agent logging</li>
+                    </ul>
+                </div>
+
+                <div class="detail-item">
+                    <h4>🔐 Session Security</h4>
+                    <ul>
+                        <li>HTTP-only cookies prevent XSS attacks</li>
+                        <li>Secure flag enabled in production</li>
+                        <li>Session timeout after 24 hours inactivity</li>
+                        <li>Automatic session destruction on logout</li>
+                    </ul>
+                </div>
+
+                <div class="detail-item">
+                    <h4>🧮 Bot Prevention</h4>
+                    <ul>
+                        <li>Mathematical CAPTCHA challenge verification</li>
+                        <li>Random operator and operand generation</li>
+                        <li>Session-based validation</li>
+                        <li>Prevents automated attack attempts</li>
+                    </ul>
+                </div>
+
+                <div class="detail-item">
+                    <h4>🌓 User Experience</h4>
+                    <ul>
+                        <li>Dynamic theme switching (Day/Night mode)</li>
+                        <li>Cybersecurity-themed dark design</li>
+                        <li>WCAG accessibility standards</li>
+                        <li>Local storage preference persistence</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Architecture Section -->
+        <section class="architecture">
+            <h2>System Architecture</h2>
+            <div class="architecture-flow">
+                <div class="flow-step">
+                    <div class="step-number">1</div>
+                    <h4>Client Request</h4>
+                </div>
+                <div class="arrow">→</div>
+                <div class="flow-step">
+                    <div class="step-number">2</div>
+                    <h4>CAPTCHA Validation</h4>
+                </div>
+                <div class="arrow">→</div>
+                <div class="flow-step">
+                    <div class="step-number">3</div>
+                    <h4>Lockout Check</h4>
+                </div>
+                <div class="arrow">→</div>
+                <div class="flow-step">
+                    <div class="step-number">4</div>
+                    <h4>Bcrypt Verify</h4>
+                </div>
+                <div class="arrow">→</div>
+                <div class="flow-step">
+                    <div class="step-number">5</div>
+                    <h4>Session Create</h4>
+                </div>
+                <div class="arrow">→</div>
+                <div class="flow-step">
+                    <div class="step-number">6</div>
+                    <h4>Activity Log</h4>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tech Stack Section -->
+        <section class="tech-stack">
+            <h2>Technology Stack</h2>
+            <div class="tech-grid">
+                <div class="tech-item">
+                    <div class="tech-icon">⚙️</div>
+                    <h4>Backend</h4>
+                    <p>Node.js with Express framework</p>
+                </div>
+                <div class="tech-item">
+                    <div class="tech-icon">📊</div>
+                    <h4>Database</h4>
+                    <p>MySQL with connection pooling</p>
+                </div>
+                <div class="tech-item">
+                    <div class="tech-icon">🔒</div>
+                    <h4>Encryption</h4>
+                    <p>bcrypts for password hashing</p>
+                </div>
+                <div class="tech-item">
+                    <div class="tech-icon">🎯</div>
+                    <h4>Frontend</h4>
+                    <p>HTML5, CSS3, Vanilla JavaScript</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Call to Action -->
+        <section class="cta">
+            <h2>Ready to Secure Your Access?</h2>
+            <p>Experience enterprise-grade security with CipherGate</p>
+            <a href="login.html" class="btn btn-primary">Login Now</a>
+            <a href="login.html" class="btn btn-secondary">Register Account</a>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <p>&copy; 2024 CipherGate - Advanced Code Breaker Security System. All rights reserved.</p>
+            <p>Secure by design. Encrypted by default.</p>
+        </div>
+    </footer>
+
+    <script src="js/theme.js"></script>
+</body>
+</html>

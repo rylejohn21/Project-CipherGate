@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CipherGate - Login & Registration</title>
+    <link rel="stylesheet" href="style.css?v=20260519-3">
+</head>
+<body>
+    <!-- Feature 14: Day/Night mode toggle -->
+    <div class="theme-toggle">
+        <button id="themeToggle" class="theme-btn" title="Toggle Dark/Light Mode">
+            🌙
+        </button>
+    </div>
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <img src="../logo1.png" alt="CipherGate Logo" class="logo-img">
+                <span class="logo-text">CipherGate</span>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="index.html" class="nav-link">Home</a></li>
+                <li><a href="index.html#features" class="nav-link">Features</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="auth-container">
+        <div class="auth-card">
+            <!-- Login Form -->
+            <div id="loginForm" class="form-section active">
+                <h2 class="form-title">Login to CipherGate</h2>
+                <form id="loginFormElement" class="form">
+                    <!-- Username Field -->
+                    <div class="form-group">
+                        <label for="loginUsername">Username</label>
+                        <input 
+                            type="text" 
+                            id="loginUsername" 
+                            name="username" 
+                            placeholder="Enter your username"
+                            required
+                        >
+                    </div>
+
+                    <!-- Password Field -->
+                    <div class="form-group">
+                        <label for="loginPassword">Password</label>
+                        <div class="password-input-group">
+                            <input 
+                                type="password" 
+                                id="loginPassword" 
+                                name="password" 
+                                placeholder="Enter your password"
+                                required
+                            >
+                            <button type="button" class="password-toggle" onclick="togglePasswordVisibility('loginPassword')">
+                                👁️
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Feature 10: Simple Math CAPTCHA -->
+                    <div class="form-group captcha-group">
+                        <label>Math CAPTCHA (Human Verification)</label>
+                        <div class="captcha-container">
+                            <div class="captcha-question" id="captchaQuestion">Loading...</div>
+                            <button type="button" id="captchaRefresh" class="captcha-refresh" onclick="loadCAPTCHA()" title="Generate new CAPTCHA">
+                                🔄 New
+                            </button>
+                        </div>
+                        <input 
+                            type="text" 
+                            id="captchaAnswer" 
+                            name="captchaAnswer" 
+                            inputmode="numeric"
+                            pattern="-?[0-9]*"
+                            autocomplete="off"
+                            placeholder="Enter the answer"
+                            required
+                        >
+                        <input type="hidden" id="captchaToken" name="captchaToken">
+                        <small class="hint">Solve the math problem above to prove you're human</small>
+                    </div>
+
+                    <!-- Security Question (Single Question) -->
+                    <div class="form-group">
+                        <label for="securityAnswer">Security Answer</label>
+                        <input 
+                            type="text" 
+                            id="securityAnswer" 
+                            name="securityAnswer" 
+                            placeholder="Your security question answer"
+                            autocomplete="off"
+                        >
+                        <small class="hint">Use the answer for the question you selected during registration.</small>
+                    </div>
+
+                    <!-- Error Message -->
+                    <div id="loginError" class="error-message" style="display: none;"></div>
+
+                    <!-- Submit Button -->
+                    <button type="submit" class="btn btn-primary btn-block">Login</button>
+
+                    <p class="form-switch">
+                        Forgot your password?
+                        <button type="button" onclick="switchForm('forgot')" class="link-btn">Reset it here</button>
+                    </p>
+
+                    <!-- Switch to Register -->
+                    <p class="form-switch">
+                        Don't have an account? 
+                        <button type="button" onclick="switchForm('register')" class="link-btn">Register here</button>
+                    </p>
+                </form>
+            </div>
+
+            <!-- Forgot Password Form -->
+            <div id="forgotForm" class="form-section">
+                <h2 class="form-title">Reset Password</h2>
+                <form id="forgotPasswordFormElement" class="form">
+                    <div class="form-group">
+                        <label for="forgotUsername">Username</label>
+                        <input type="text" id="forgotUsername" name="forgotUsername" placeholder="Enter your username" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="recoveryValue">Gmail / Email</label>
+                        <input type="email" id="recoveryValue" name="recoveryValue" placeholder="Enter your Gmail or email" required>
+                        <small class="hint">Use the same email address you registered with.</small>
+                    </div>
+
+                    <button type="button" onclick="requestPasswordResetCode()" class="btn btn-secondary btn-block">Send Verification Code</button>
+
+                    <div class="form-group">
+                        <label for="verificationCode">Verification Code</label>
+                        <input type="text" id="verificationCode" name="verificationCode" placeholder="Enter the 6-digit code" maxlength="6" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="resetNewPassword">New Password</label>
+                        <div class="password-input-group">
+                            <input type="password" id="resetNewPassword" name="resetNewPassword" placeholder="At least 8 chars (1 uppercase, 1 number)" required>
+                            <button type="button" class="password-toggle" onclick="togglePasswordVisibility('resetNewPassword')">Show</button>
+                        </div>
+                    </div>
+
+                    <div id="forgotPasswordMessage" class="info-message" style="display: none;"></div>
+                    <div id="forgotPasswordError" class="error-message" style="display: none;"></div>
+                    <div id="forgotPasswordSuccess" class="success-message" style="display: none;"></div>
+
+                    <button type="submit" class="btn btn-primary btn-block">Reset Password</button>
+
+                    <p class="form-switch">
+                        Remembered your password?
+                        <button type="button" onclick="switchForm('login')" class="link-btn">Back to login</button>
+                    </p>
+                </form>
+            </div>
+
+            <!-- Registration Form -->
+            <div id="registerForm" class="form-section">
+                <h2 class="form-title">Create Account</h2>
+                <form id="registerFormElement" class="form">
+                    <!-- Username Field -->
+                    <div class="form-group">
+                        <label for="regUsername">Username</label>
+                        <input 
+                            type="text" 
+                            id="regUsername" 
+                            name="username" 
+                            placeholder="Choose a username"
+                            required
+                        >
+                        <small class="hint">Username must be unique</small>
+                    </div>
+
+                    <!-- Password Field -->
+                    <div class="form-group">
+                        <label for="regPassword">Password</label>
+                        <div class="password-input-group">
+                            <input 
+                                type="password" 
+                                id="regPassword" 
+                                name="password" 
+                                placeholder="At least 8 chars (1 uppercase, 1 number)"
+                                required
+                            >
+                            <button type="button" class="password-toggle" onclick="togglePasswordVisibility('regPassword')">
+                                👁️
+                            </button>
+                        </div>
+                        <small class="hint">Minimum 8 characters with 1 uppercase letter and 1 number</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="regEmail">Gmail / Email</label>
+                        <input type="email" id="regEmail" name="email" placeholder="Enter your Gmail or email" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="regMobileNumber">Mobile Number</label>
+                        <input type="tel" id="regMobileNumber" name="mobileNumber" placeholder="e.g. +639123456789" required>
+                        <small class="hint">Used for account profile data only. Password recovery now uses Gmail / email only.</small>
+                    </div>
+
+                    <!-- Security Question -->
+                    <div class="form-group">
+                        <label for="securityQuestion">Security Question</label>
+                        <select id="securityQuestion" name="securityQuestion" required>
+                            <option value="">Select a security question</option>
+                            <option value="What is your favorite color?">What is your favorite color?</option>
+                            <option value="What are your favorite animals?">What are your favorite animals?</option>
+                        </select>
+                    </div>
+
+                    <!-- Security Answer -->
+                    <div class="form-group">
+                        <label for="regSecurityAnswer">Answer to Your Question</label>
+                        <input 
+                            type="text" 
+                            id="regSecurityAnswer" 
+                            name="securityAnswer" 
+                            placeholder="Your answer"
+                            required
+                        >
+                        <small class="hint">You'll need this to recover your account</small>
+                    </div>
+
+                    <!-- Error Message -->
+                    <div id="registerError" class="error-message" style="display: none;"></div>
+
+                    <!-- Submit Button -->
+                    <button type="submit" class="btn btn-primary btn-block">Create Account</button>
+
+                    <!-- Switch to Login -->
+                    <p class="form-switch">
+                        Already have an account? 
+                        <button type="button" onclick="switchForm('login')" class="link-btn">Login here</button>
+                    </p>
+                </form>
+            </div>
+        </div>
+
+        <!-- Info Card -->
+        <div class="info-card">
+            <h3>🔐 Security Features Active</h3>
+            <ul class="security-list">
+                <li>✅ Bcrypt password hashing</li>
+                <li>✅ 3-attempt lockout protection</li>
+                <li>✅ Math CAPTCHA verification</li>
+                <li>✅ Secure session management</li>
+                <li>✅ Dark/Light theme support</li>
+            </ul>
+            <div class="demo-credentials">
+                <h4>Demo Credentials:</h4>
+                <p><strong>Admin:</strong> admin / Admin@123</p>
+                <p><strong>User:</strong> testuser / User@123</p>
+                <small>Security Answer: blue (admin), fluffy (testuser)</small>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>&copy; 2024 CipherGate - Advanced Code Breaker Security System</p>
+    </footer>
+
+    <script src="js/config.js?v=20260519-2"></script>
+    <script src="js/api.js?v=20260519-2"></script>
+    <script src="js/theme.js?v=20260519-2"></script>
+    <script src="js/auth.js?v=20260519-2"></script>
+</body>
+</html>
