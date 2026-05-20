@@ -199,12 +199,6 @@
                         <input type="email" id="regEmail" name="email" placeholder="Enter your Gmail or email" required>
                     </div>
 
-                    <div class="form-group">
-                        <label for="regMobileNumber">Mobile Number</label>
-                        <input type="tel" id="regMobileNumber" name="mobileNumber" placeholder="e.g. +639123456789" required>
-                        <small class="hint">Used for account profile data only. Password recovery now uses Gmail / email only.</small>
-                    </div>
-
                     <!-- Security Question -->
                     <div class="form-group">
                         <label for="securityQuestion">Security Question</label>
@@ -250,6 +244,7 @@
                 <li>✅ Bcrypt password hashing</li>
                 <li>✅ 3-attempt lockout protection</li>
                 <li>✅ Math CAPTCHA verification</li>
+                <li>✅ Gmail/email OTP for registered user logins</li>
                 <li>✅ Secure session management</li>
                 <li>✅ Dark/Light theme support</li>
             </ul>
@@ -257,7 +252,7 @@
                 <h4>Demo Credentials:</h4>
                 <p><strong>Admin:</strong> admin / Admin@123</p>
                 <p><strong>User:</strong> testuser / User@123</p>
-                <small>Security Answer: blue (admin), fluffy (testuser)</small>
+                <small>Security Answer: blue (admin), fluffy (testuser). Demo accounts skip OTP.</small>
             </div>
         </div>
     </div>
@@ -269,6 +264,6 @@
     <script src="js/config.js?v=20260519-2"></script>
     <script src="js/api.js?v=20260519-2"></script>
     <script src="js/theme.js?v=20260519-2"></script>
-    <script src="js/auth.js?v=20260519-2"></script>
+    <script src="js/auth.js?v=20260520-otp"></script>
 </body>
 </html>

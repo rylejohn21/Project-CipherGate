@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CipherGate - Login OTP Verification</title>
+    <link rel="stylesheet" href="style.css?v=20260520-otp">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <img src="../logo1.png" alt="CipherGate Logo" class="logo-img">
+                <span class="logo-text">CipherGate</span>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="index.html" class="nav-link">Home</a></li>
+                <li><a href="login.html" class="nav-link">Login</a></li>
+            </ul>
+            <div class="theme-toggle">
+                <button id="themeToggle" class="theme-btn" title="Toggle Dark/Light Mode">Mode</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="auth-container otp-auth-container">
+        <div class="auth-card">
+            <div class="form-section active">
+                <h2 class="form-title">Verify Login OTP</h2>
+                <form id="otpFormElement" class="form">
+                    <div id="otpMessage" class="info-message" style="display: none;"></div>
+                    <div id="otpSuccess" class="success-message" style="display: none;"></div>
+                    <div id="otpError" class="error-message" style="display: none;"></div>
+
+                    <div class="form-group">
+                        <label for="otpCode">6-Digit OTP</label>
+                        <input
+                            type="text"
+                            id="otpCode"
+                            name="otpCode"
+                            inputmode="numeric"
+                            pattern="[0-9]{6}"
+                            maxlength="6"
+                            autocomplete="one-time-code"
+                            placeholder="Enter the code from your Gmail/email"
+                            required
+                        >
+                        <small class="hint">This code expires shortly and can only be used once.</small>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-block">Verify and Continue</button>
+                    <button type="button" id="resendOtpButton" class="btn btn-secondary btn-block">Resend OTP</button>
+
+                    <p class="form-switch">
+                        Wrong account?
+                        <button type="button" id="backToLoginButton" class="link-btn">Back to login</button>
+                    </p>
+                </form>
+            </div>
+        </div>
+
+        <div class="info-card">
+            <h3>Extra Login Security</h3>
+            <ul class="security-list">
+                <li>Password and security answer are checked first</li>
+                <li>A one-time code is sent to your registered Gmail/email</li>
+                <li>Dashboard access starts only after OTP verification</li>
+                <li>Expired or invalid codes require another login attempt</li>
+            </ul>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>&copy; 2024 CipherGate - Advanced Code Breaker Security System</p>
+    </footer>
+
+    <script src="js/config.js?v=20260519-2"></script>
+    <script src="js/api.js?v=20260519-2"></script>
+    <script src="js/theme.js?v=20260519-2"></script>
+    <script src="js/otp.js?v=20260520-otp"></script>
+</body>
+</html>

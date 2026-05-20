@@ -16,6 +16,7 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 const RESET_CODE_EXPIRY_MINUTES = parseInt(process.env.RESET_CODE_EXPIRY_MINUTES || '10', 10);
+const LOGIN_OTP_EXPIRY_MINUTES = parseInt(process.env.LOGIN_OTP_EXPIRY_MINUTES || '10', 10);
 const ALLOWED_SECURITY_QUESTIONS = [
   'What is your favorite color?',
   'What are your favorite animals?'
@@ -249,6 +250,10 @@ function normalizePhoneNumber(phoneNumber = '') {
   return digitsOnly;
 }
 
+function normalizeUsername(username = '') {
+  return username.trim();
+}
+
 function isValidEmail(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizeEmail(email));
 }
@@ -259,7 +264,7 @@ function isValidPhoneNumber(phoneNumber) {
 }
 
 function generateResetCode() {
-  return `${Math.floor(100000 + Math.random() * 900000)}`;
+  return `${crypto.randomInt(100000, 1000000)}`;
 }
 
 function base64UrlEncode(value) {
@@ -381,6 +386,75 @@ function generateCAPTCHA() {
     question: `${num1} ${operator} ${num2}`,
     answer,
     captchaToken: createCaptchaToken(answer)
+  };
+}
+
+async function sendLoginOtpByEmail(email, username, code) {
+  if (!nodemailer) {
+    throw new Error('Email delivery dependency is not installed.');
+  }
+
+  if (!process.env.GMAIL_USER || !process.env.GMAIL_APP_PASSWORD) {
+    throw new Error('Gmail OTP delivery is not configured.');
+  }
+
+  const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: process.env.GMAIL_USER,
+      pass: process.env.GMAIL_APP_PASSWORD
+    }
+  });
+
+  await transporter.sendMail({
+    from: process.env.MAIL_FROM || process.env.GMAIL_USER,
+    to: email,
+    subject: 'CipherGate Login OTP',
+    text: `Hello ${username}, your CipherGate login OTP is ${code}. It expires in ${LOGIN_OTP_EXPIRY_MINUTES} minutes.`,
+    html: `<p>Hello <strong>${username}</strong>,</p><p>Your CipherGate login OTP is:</p><h2 style="letter-spacing: 4px;">${code}</h2><p>This code expires in ${LOGIN_OTP_EXPIRY_MINUTES} minutes.</p>`
+  });
+}
+
+function maskEmail(email = '') {
+  const [localPart, domain] = email.split('@');
+
+  if (!localPart || !domain) {
+    return 'your registered email';
+  }
+
+  const visibleLocal = localPart.length <= 2
+    ? `${localPart[0] || ''}*`
+    : `${localPart.slice(0, 2)}${'*'.repeat(Math.min(localPart.length - 2, 4))}`;
+
+  return `${visibleLocal}@${domain}`;
+}
+
+async function createPendingLogin(req, user, email) {
+  const otpCode = generateResetCode();
+
+  await sendLoginOtpByEmail(email, user.username, otpCode);
+
+  req.session.pendingLogin = {
+    user: {
+      id: user.id,
+      username: user.username,
+      role: user.role
+    },
+    email,
+    otpHash: hashResetCode(otpCode),
+    expiresAt: Date.now() + LOGIN_OTP_EXPIRY_MINUTES * 60 * 1000
+  };
+}
+
+function isLoginOtpExemptUser(user) {
+  return ['admin', 'testuser'].includes((user?.username || '').toLowerCase());
+}
+
+function createAuthenticatedSession(req, user) {
+  req.session.user = {
+    id: user.id,
+    username: user.username,
+    role: user.role
   };
 }
 
@@ -553,8 +627,10 @@ app.post('/api/login', async (req, res) => {
     }
 
     // Feature 3: Check if account is locked
-    if (await isAccountLocked(username)) {
-      logActivity(username, 'LOGIN_ATTEMPT_LOCKED', 'Account is locked', req);
+    const normalizedUsername = normalizeUsername(username);
+
+    if (await isAccountLocked(normalizedUsername)) {
+      logActivity(normalizedUsername, 'LOGIN_ATTEMPT_LOCKED', 'Account is locked', req);
       return res.status(429).json({ 
         message: 'Account locked due to multiple failed attempts. Try again in 30 seconds.' 
       });
@@ -566,18 +642,18 @@ app.post('/api/login', async (req, res) => {
     }
 
     if (!verifyCaptchaToken(captchaToken, captchaAnswer)) {
-      if (username) {
-        await recordFailedAttempt(username);
+      if (normalizedUsername) {
+        await recordFailedAttempt(normalizedUsername);
       }
-      logActivity(username, 'LOGIN_CAPTCHA_FAILURE', 'Invalid CAPTCHA', req);
+      logActivity(normalizedUsername, 'LOGIN_CAPTCHA_FAILURE', 'Invalid CAPTCHA', req);
       return res.status(400).json({ message: 'Invalid CAPTCHA' });
     }
 
     // Retrieve user from database
     const { data: user, error } = await supabase
       .from('users')
-      .select('id, username, password_hash, role, security_question, security_answer')
-      .eq('username', username)
+      .select('id, username, password_hash, role, email, security_question, security_answer')
+      .ilike('username', normalizedUsername)
       .single();
 
     if (error && error.code !== 'PGRST116') {
@@ -586,47 +662,163 @@ app.post('/api/login', async (req, res) => {
     }
 
     if (!user) {
-      logActivity(username, 'LOGIN_FAILURE', 'User not found', req);
+      logActivity(normalizedUsername, 'LOGIN_FAILURE', 'User not found', req);
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
     // Feature 1 & 12: Verify password using bcrypt
     const passwordMatch = await verifyPassword(password, user.password_hash);
     if (!passwordMatch) {
-      await recordFailedAttempt(username);
-      logActivity(username, 'LOGIN_FAILURE', 'Invalid password', req);
+      await recordFailedAttempt(normalizedUsername);
+      logActivity(normalizedUsername, 'LOGIN_FAILURE', 'Invalid password', req);
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
     // Verify Security Question Answer
     if (user.security_answer && securityAnswer) {
       if (securityAnswer.toLowerCase() !== user.security_answer.toLowerCase()) {
-        await recordFailedAttempt(username);
-        logActivity(username, 'LOGIN_SECURITY_FAILURE', 'Invalid security answer', req);
+        await recordFailedAttempt(normalizedUsername);
+        logActivity(normalizedUsername, 'LOGIN_SECURITY_FAILURE', 'Invalid security answer', req);
         return res.status(401).json({ message: 'Invalid security answer' });
       }
     }
 
     // Feature 3: Reset failed attempts on successful login
-    await resetFailedAttempts(username);
+    await resetFailedAttempts(normalizedUsername);
 
-    // Feature 6: Create and establish session
-    req.session.user = {
-      id: user.id,
-      username: user.username,
-      role: user.role
-    };
+    if (isLoginOtpExemptUser(user)) {
+      createAuthenticatedSession(req, user);
+      await logActivity(username, 'LOGIN_SUCCESS', 'Demo account logged in without OTP', req);
+      return res.json({
+        message: 'Login successful.',
+        user: req.session.user,
+        redirect: req.session.user.role === 'admin' ? '/admin_dashboard.html' : '/user_dashboard.html'
+      });
+    }
 
-    logActivity(username, 'LOGIN_SUCCESS', 'User logged in successfully', req);
-    res.json({ 
-      message: 'Login successful', 
-      user: req.session.user,
-      redirect: user.role === 'admin' ? '/admin_dashboard.html' : '/user_dashboard.html'
+    if (!user.email || !isValidEmail(user.email)) {
+      return res.status(400).json({ message: 'This account does not have a valid email for OTP verification' });
+    }
+
+    await createPendingLogin(req, user, normalizeEmail(user.email));
+
+    logActivity(username, 'LOGIN_OTP_SENT', 'Login OTP sent via email', req);
+    res.json({
+      message: 'Credentials verified. Check your Gmail/email for the OTP.',
+      email: maskEmail(user.email),
+      redirect: '/otp.html'
     });
 
   } catch (error) {
     console.error('Login error:', error);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: error.message || 'Server error' });
+  }
+});
+
+/**
+ * Route: GET /api/login-otp/status
+ * Returns information about a pending OTP challenge.
+ */
+app.get('/api/login-otp/status', (req, res) => {
+  const pendingLogin = req.session.pendingLogin;
+
+  if (!pendingLogin || !pendingLogin.user) {
+    return res.status(401).json({ message: 'No OTP verification is pending' });
+  }
+
+  if (!pendingLogin.expiresAt || Date.now() > pendingLogin.expiresAt) {
+    delete req.session.pendingLogin;
+    return res.status(401).json({ message: 'Your OTP expired. Please log in again.' });
+  }
+
+  res.json({
+    username: pendingLogin.user.username,
+    email: maskEmail(pendingLogin.email),
+    expiresAt: pendingLogin.expiresAt
+  });
+});
+
+/**
+ * Route: POST /api/login-otp/verify
+ * Completes login only after the Gmail/email OTP is verified.
+ */
+app.post('/api/login-otp/verify', async (req, res) => {
+  try {
+    const { otpCode } = req.body;
+    const pendingLogin = req.session.pendingLogin;
+
+    if (!pendingLogin || !pendingLogin.user) {
+      return res.status(401).json({ message: 'No OTP verification is pending. Please log in again.' });
+    }
+
+    if (!otpCode) {
+      return res.status(400).json({ message: 'OTP code is required' });
+    }
+
+    if (!pendingLogin.expiresAt || Date.now() > pendingLogin.expiresAt) {
+      delete req.session.pendingLogin;
+      return res.status(400).json({ message: 'OTP expired. Please log in again.' });
+    }
+
+    if (hashResetCode(otpCode) !== pendingLogin.otpHash) {
+      await recordFailedAttempt(pendingLogin.user.username);
+      await logActivity(pendingLogin.user.username, 'LOGIN_OTP_FAILURE', 'Invalid login OTP', req);
+
+      if (await isAccountLocked(pendingLogin.user.username)) {
+        delete req.session.pendingLogin;
+        return res.status(429).json({
+          message: 'Account locked due to multiple failed attempts. Try again in 30 seconds.'
+        });
+      }
+
+      return res.status(401).json({ message: 'Invalid OTP code' });
+    }
+
+    createAuthenticatedSession(req, pendingLogin.user);
+    delete req.session.pendingLogin;
+
+    await resetFailedAttempts(req.session.user.username);
+    await logActivity(req.session.user.username, 'LOGIN_SUCCESS', 'User completed OTP login successfully', req);
+
+    res.json({
+      message: 'OTP verified. Login successful.',
+      user: req.session.user,
+      redirect: req.session.user.role === 'admin' ? '/admin_dashboard.html' : '/user_dashboard.html'
+    });
+  } catch (error) {
+    console.error('Login OTP verification error:', error);
+    res.status(500).json({ message: 'Unable to verify OTP' });
+  }
+});
+
+/**
+ * Route: POST /api/login-otp/resend
+ * Sends a fresh OTP for the current pending login.
+ */
+app.post('/api/login-otp/resend', async (req, res) => {
+  try {
+    const pendingLogin = req.session.pendingLogin;
+
+    if (!pendingLogin || !pendingLogin.user || !pendingLogin.email) {
+      return res.status(401).json({ message: 'No OTP verification is pending. Please log in again.' });
+    }
+
+    const otpCode = generateResetCode();
+    pendingLogin.otpHash = hashResetCode(otpCode);
+    pendingLogin.expiresAt = Date.now() + LOGIN_OTP_EXPIRY_MINUTES * 60 * 1000;
+    req.session.pendingLogin = pendingLogin;
+
+    await sendLoginOtpByEmail(pendingLogin.email, pendingLogin.user.username, otpCode);
+    await logActivity(pendingLogin.user.username, 'LOGIN_OTP_RESENT', 'Login OTP resent via email', req);
+
+    res.json({
+      message: 'A new OTP was sent to your Gmail/email.',
+      email: maskEmail(pendingLogin.email),
+      expiresAt: pendingLogin.expiresAt
+    });
+  } catch (error) {
+    console.error('Login OTP resend error:', error);
+    res.status(500).json({ message: error.message || 'Unable to resend OTP' });
   }
 });
 
@@ -636,9 +828,9 @@ app.post('/api/login', async (req, res) => {
  */
 app.post('/api/register', async (req, res) => {
   try {
-    const { username, password, email, mobileNumber, securityQuestion, securityAnswer } = req.body;
+    const { username, password, email, securityQuestion, securityAnswer } = req.body;
 
-    if (!username || !password || !email || !mobileNumber || !securityQuestion || !securityAnswer) {
+    if (!username || !password || !email || !securityQuestion || !securityAnswer) {
       return res.status(400).json({ message: 'All fields required' });
     }
 
@@ -650,15 +842,11 @@ app.post('/api/register', async (req, res) => {
       });
     }
 
+    const normalizedUsername = normalizeUsername(username);
     const normalizedEmail = normalizeEmail(email);
-    const normalizedMobileNumber = normalizePhoneNumber(mobileNumber);
 
     if (!isValidEmail(normalizedEmail)) {
       return res.status(400).json({ message: 'Enter a valid email address' });
-    }
-
-    if (!isValidPhoneNumber(normalizedMobileNumber)) {
-      return res.status(400).json({ message: 'Enter a valid mobile number with country code if possible' });
     }
 
     if (!ALLOWED_SECURITY_QUESTIONS.includes(securityQuestion)) {
@@ -668,7 +856,7 @@ app.post('/api/register', async (req, res) => {
     // Feature 1 & 12: Hash password before storing
     const passwordHash = await hashPassword(password);
 
-    const { data: existingUsername } = await supabase.from('users').select('id').eq('username', username).single();
+    const { data: existingUsername } = await supabase.from('users').select('id').ilike('username', normalizedUsername).single();
     if (existingUsername) {
       return res.status(409).json({ message: 'Username already exists' });
     }
@@ -678,17 +866,11 @@ app.post('/api/register', async (req, res) => {
       return res.status(409).json({ message: 'Email is already in use' });
     }
 
-    const { data: existingMobileNumber } = await supabase.from('users').select('id').eq('mobile_number', normalizedMobileNumber).single();
-    if (existingMobileNumber) {
-      return res.status(409).json({ message: 'Mobile number is already in use' });
-    }
-
     // Insert new user
     await supabase.from('users').insert([{ 
-      username, 
+      username: normalizedUsername, 
       password_hash: passwordHash, 
       email: normalizedEmail,
-      mobile_number: normalizedMobileNumber,
       security_question: securityQuestion, 
       security_answer: securityAnswer 
     }]);
@@ -796,8 +978,9 @@ app.get('/api/users', rbacMiddleware(['admin']), async (req, res) => {
 app.post('/api/forgot-password/request', async (req, res) => {
   try {
     const { username, recoveryValue } = req.body;
+    const normalizedUsername = normalizeUsername(username);
 
-    if (!username || !recoveryValue) {
+    if (!normalizedUsername || !recoveryValue) {
       return res.status(400).json({ message: 'Username and email are required' });
     }
 
@@ -811,7 +994,7 @@ app.post('/api/forgot-password/request', async (req, res) => {
     const { data: user, error } = await supabase
       .from('users')
       .select('username, email')
-      .eq('username', username)
+      .ilike('username', normalizedUsername)
       .single();
 
     if (error || !user) {
@@ -835,7 +1018,7 @@ app.post('/api/forgot-password/request', async (req, res) => {
         reset_code_method: method,
         reset_code_expires_at: resetCodeExpiresAt
       })
-      .eq('username', username);
+      .ilike('username', normalizedUsername);
 
     if (updateError) {
       console.error('Error storing password reset code:', updateError);
@@ -859,8 +1042,9 @@ app.post('/api/forgot-password/request', async (req, res) => {
 app.post('/api/forgot-password/reset', async (req, res) => {
   try {
     const { username, verificationCode, newPassword } = req.body;
+    const normalizedUsername = normalizeUsername(username);
 
-    if (!username || !verificationCode || !newPassword) {
+    if (!normalizedUsername || !verificationCode || !newPassword) {
       return res.status(400).json({ message: 'All reset fields are required' });
     }
 
@@ -875,7 +1059,7 @@ app.post('/api/forgot-password/reset', async (req, res) => {
     const { data: user, error } = await supabase
       .from('users')
       .select('username, reset_code_hash, reset_code_method, reset_code_expires_at')
-      .eq('username', username)
+      .ilike('username', normalizedUsername)
       .single();
 
     if (error || !user) {
@@ -909,7 +1093,7 @@ app.post('/api/forgot-password/reset', async (req, res) => {
         reset_code_method: null,
         reset_code_expires_at: null
       })
-      .eq('username', username);
+      .ilike('username', normalizedUsername);
 
     if (updateError) {
       console.error('Error updating password after reset:', updateError);

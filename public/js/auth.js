@@ -119,7 +119,7 @@ async function loadCAPTCHA() {
 async function handleLogin(e) {
   e.preventDefault();
   
-  const username = document.getElementById('loginUsername').value;
+  const username = document.getElementById('loginUsername').value.trim();
   const password = document.getElementById('loginPassword').value;
   const captchaAnswer = document.getElementById('captchaAnswer').value;
   const captchaToken = currentCaptchaToken || document.getElementById('captchaToken').value;
@@ -168,8 +168,8 @@ async function handleLogin(e) {
       return;
     }
     
-    // Feature 6: Successful login - session created on server
-    console.log('Login successful for user:', data.user.username);
+    // Credentials are valid. OTP verification happens before the dashboard session starts.
+    console.log('Credentials verified. Redirecting to OTP verification.');
     
     // Redirect to appropriate dashboard based on role
     if (data.redirect) {
@@ -191,10 +191,9 @@ async function handleLogin(e) {
 async function handleRegister(e) {
   e.preventDefault();
   
-  const username = document.getElementById('regUsername').value;
+  const username = document.getElementById('regUsername').value.trim();
   const password = document.getElementById('regPassword').value;
-  const email = document.getElementById('regEmail').value;
-  const mobileNumber = document.getElementById('regMobileNumber').value;
+  const email = document.getElementById('regEmail').value.trim();
   const securityQuestion = document.getElementById('securityQuestion').value;
   const securityAnswer = document.getElementById('regSecurityAnswer').value;
   const registerError = document.getElementById('registerError');
@@ -221,7 +220,6 @@ async function handleRegister(e) {
         username,
         password,
         email,
-        mobileNumber,
         securityQuestion,
         securityAnswer
       })
@@ -287,8 +285,8 @@ function clearForgotPasswordMessages() {
 async function requestPasswordResetCode() {
   clearForgotPasswordMessages();
 
-  const username = document.getElementById('forgotUsername').value;
-  const recoveryValue = document.getElementById('recoveryValue').value;
+  const username = document.getElementById('forgotUsername').value.trim();
+  const recoveryValue = document.getElementById('recoveryValue').value.trim();
   const forgotPasswordMessage = document.getElementById('forgotPasswordMessage');
   const forgotPasswordError = document.getElementById('forgotPasswordError');
 
@@ -331,8 +329,8 @@ async function handlePasswordReset(e) {
   e.preventDefault();
   clearForgotPasswordMessages();
 
-  const username = document.getElementById('forgotUsername').value;
-  const verificationCode = document.getElementById('verificationCode').value;
+  const username = document.getElementById('forgotUsername').value.trim();
+  const verificationCode = document.getElementById('verificationCode').value.trim();
   const newPassword = document.getElementById('resetNewPassword').value;
   const forgotPasswordError = document.getElementById('forgotPasswordError');
   const forgotPasswordSuccess = document.getElementById('forgotPasswordSuccess');
